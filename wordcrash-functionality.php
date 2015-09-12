@@ -87,3 +87,44 @@ function wc_save_new_user_fields( $user_id ) {
 	update_user_meta( $user_id, 'pets', $_POST['pets'] );
 	update_user_meta( $user_id, 'capacity', $_POST['capacity'] );
 }
+
+
+
+/**
+ * Filter new user notification email
+ */
+//add_filter( 'wpmu_signup_user_notification', 'dk_wpmu_signup_user_notification', 10, 4 );
+/**
+ * Problem: WordPress MultiSite sends user signup mails from the main site. This is a problem when using domain mapping functionality as the sender is not the same domain as expected when creating a new user from a blog with another domain.
+ * Solution: Change the default user notification mail from using the main network admin_email and site_name to the blog admin_email & blogname
+ * 
+ * @author Daan Kortenbach
+ * @link http://daankortenbach.nl/wordpress/filter-wpmu_signup_user_notification/ 
+ */
+function dk_wpmu_signup_user_notification($user, $user_email, $key, $meta = '') {
+	$blog_id = get_current_blog_id();
+	// Send email with activation link.
+	$admin_email = get_option( 'admin_email' );
+	if ( $admin_email == '' )
+		$admin_email = 'support@' . $_SERVER['SERVER_NAME'];
+	$from_name = get_option( 'blogname' ) == '' ? 'WordPress' : esc_html( get_option( 'blogname' ) );
+	$message_headers = "From: \"{$from_name}\" <{$admin_email}>\n" . "Content-Type: text/plain; charset=\"" . get_option('blog_charset') . "\"\n";
+	$message = sprintf(
+		apply_filters( 'wpmu_signup_user_notification_email',
+			__( "To activate your user, please click the following link:\n\n%s\n\nAfter you activate, you will receive *another email* with your login.\n\n" ),
+			$user, $user_email, $key, $meta
+		),
+		site_url( "wp-activate.php?key=$key" )
+	);
+	// TODO: Don't hard code activation link.
+	$subject = sprintf(
+		apply_filters( 'wpmu_signup_user_notification_subject',
+			__( '[%1$s] Activate %2$s' ),
+			$user, $user_email, $key, $meta
+		),
+		$from_name,
+		$user
+	);
+	mail($user_email, $subject, $message, $message_headers);
+	return false;
+}
