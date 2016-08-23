@@ -84,14 +84,14 @@ function wc_save_new_user_fields( $user_id ) {
     
     $states = wc_get_states_array();
     
-    if ( array_key_exists( strtoupper( $_POST['state'] ), $states ) ) {
+    if ( array_key_exists( strtoupper( trim( $_POST['state'] ) ), $states ) ) {
             
-        $_POST['state'] = $states[ strtoupper( $_POST['state'] ) ];
+        $_POST['state'] = $states[ strtoupper( trim( $_POST['state'] ) ) ];
 
     }
     
-    $_POST['country'] = preg_replace( '/(?:The\s)?United\sStates(?:\sof\sAmerica)?/i', 'USA', $_POST['country'] );
-    if ( strtolower( $_POST['country'] ) == 'us' || $_POST['country'] == 'usa' ) $_POST['country'] = 'USA'; // To grab those outliers
+    $_POST['country'] = preg_replace( '/(?:The\s)?United\sStates(?:\sof\sAmerica)?/i', 'USA', trim( $_POST['country'] ) );
+    if ( strtolower( trim( $_POST['country'] ) ) == 'us' || trim( $_POST['country'] ) == 'usa' ) $_POST['country'] = 'USA'; // To grab those outliers
     
 	update_user_meta( $user_id, 'country', $_POST['country'] );
 	update_user_meta( $user_id, 'state', $_POST['state'] );
@@ -116,17 +116,17 @@ function wc_sanitize_countries_states( $form ) {
         
         if ( $field->label == 'State/Province' ) {
             
-            if ( array_key_exists( strtoupper( $_POST[ 'input_' . $field->id ] ) ) ) {
+            if ( array_key_exists( strtoupper( trim( $_POST[ 'input_' . $field->id ] ) ) ) ) {
             
-                $_POST[ 'input_' . $field->id ] = $states[ strtoupper( $_POST[ 'input_' . $field->id ] ) ];
+                $_POST[ 'input_' . $field->id ] = $states[ strtoupper( trim( $_POST[ 'input_' . $field->id ] ) ) ];
                 
             }
             
         }
         else if ( $field->label == 'Country' ) {
             
-            $_POST[ 'input_' . $field->id ] = preg_replace( '/(?:The\s)?United\sStates(?:\sof\sAmerica)?/i', 'USA', $_POST[ 'input_' . $field->id ] );
-            if ( strtolower( $_POST[ 'input_' . $field->id ] ) == 'us' || $_POST[ 'input_' . $field->id ] == 'usa' ) $_POST[ 'input_' . $field->id ] = 'USA'; // To grab those outliers
+            $_POST[ 'input_' . $field->id ] = preg_replace( '/(?:The\s)?United\sStates(?:\sof\sAmerica)?/i', 'USA', trim( $_POST[ 'input_' . $field->id ] ) );
+            if ( strtolower( trim( $_POST[ 'input_' . $field->id ] ) ) == 'us' || trim( $_POST[ 'input_' . $field->id ] ) == 'usa' ) $_POST[ 'input_' . $field->id ] = 'USA'; // To grab those outliers
             
         }
         
